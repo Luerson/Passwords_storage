@@ -1,177 +1,244 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct {
-    int ID;
-    char titulo[50];
-    char usuario[20];
-    char senha[20];
+typedef struct
+{
+  int ID;
+  char titulo[50];
+  char usuario[20];
+  char senha[20];
 } Senha;
 
-//Criei essa função porque eu e Klayvert vamos ter que usar esse trecho
-//de código novamente na função alterarSenha().
-int contarSenhas() {
-    FILE *f = fopen("senhas.bin", "rb"); //apenas leitura
-    Senha senha;
-    int contador = 0;
+// Criei essa função porque eu e Klayvert vamos ter que usar esse trecho
+// de código novamente na função alterarSenha().
+int contarSenhas()
+{
+  FILE *f = fopen("senhas.bin", "rb"); // apenas leitura
+  Senha senha;
+  int contador = 0;
 
-    if (f == NULL) {
-        printf("\nErro! Nao foi possivel abrir o arquivo\n");
-        exit(1);
-    }
+  if (f == NULL)
+  {
+    printf("\nErro! Nao foi possivel abrir o arquivo\n");
+    exit(1);
+  }
 
-    //A cada senha encontrada, o contador é incrementado
-    while (fread(&senha, sizeof(Senha), 1, f)) {
-        contador++;
-    }
-    return contador;
+  // A cada senha encontrada, o contador é incrementado
+  while (fread(&senha, sizeof(Senha), 1, f))
+  {
+    contador++;
+  }
+  return contador;
 }
 
-
-void listar(); // principal
+void listar();    // principal
 void adicionar(); // principal
 
-//void barraDeBusca(); - Secundário
-//void alterarSenha(); - Secundário
+// void barraDeBusca(); - Secundário
+// void alterarSenha(); - Secundário
 
+// criarSenha() -- Se der tempo!!!!!
 
-//criarSenha() -- Se der tempo!!!!!
+void deletar(int id, int totalDeSenhas)
+{
+  FILE *f;
+  Senha senha;
+  Senha listaDeSenhas[totalDeSenhas - 1];
+  int deletados = 0;
 
-void deletar(int id, int totalDeSenhas) {
-    FILE *f;
-    Senha senha;
-    Senha listaDeSenhas[totalDeSenhas-1];
-    int deletados = 0;
+  f = fopen("senhas.bin", "rb");
 
-    f = fopen("senhas.bin", "rb");
+  if (f == NULL)
+  {
+    printf("\nErro! Nao foi possivel criar o arquivo\n");
+    exit(2);
+  }
 
-    if (f == NULL) {
-        printf("\nErro! Nao foi possivel criar o arquivo\n");
-        exit(2);
+  // Esse 'for' armazena todas as senhas em um vetor de senhas,
+  // com exceção da que o usuário deseja deletar
+  for (int i = 0; i < totalDeSenhas; i++)
+  {
+    fread(&senha, sizeof(Senha), 1, f);
+
+    if (senha.ID != id)
+    {
+      listaDeSenhas[i - deletados] = senha;
     }
-
-    //Esse 'for' armazena todas as senhas em um vetor de senhas,
-    //com exceção da que o usuário deseja deletar
-    for (int i = 0; i < totalDeSenhas; i++) {
-        fread(&senha, sizeof(Senha), 1, f);  
-
-        if (senha.ID != id) {
-            listaDeSenhas[i - deletados] = senha;
-        } else {
-            deletados++;
-        }
+    else
+    {
+      deletados++;
     }
+  }
 
-    fclose(f);
-    //fechando aruivo de leitura
+  fclose(f);
+  // fechando aruivo de leitura
 
+  // abrindo arquivo de escrita. Esse método destroi
+  // todo conteúdo do arquivo original, mas as informações
+  // desejadas contiuam salvas no vetor 'listaDeSenhas[]'
+  f = fopen("senhas.bin", "wb");
 
-    //abrindo arquivo de escrita. Esse método destroi
-    //todo conteúdo do arquivo original, mas as informações
-    //desejadas contiuam salvas no vetor 'listaDeSenhas[]'
-    f = fopen("senhas.bin", "wb");
+  if (f == NULL)
+  {
+    printf("\nErro! Nao foi possivel criar o arquivo\n");
+    exit(3);
+  }
 
-    if (f == NULL) {
-        printf("\nErro! Nao foi possivel criar o arquivo\n");
-        exit(3);
-    }
+  // escrevendo a informação no novo arquivo
+  for (int i = 0; i < totalDeSenhas - 1; i++)
+  {
+    fwrite(&listaDeSenhas[i], sizeof(Senha), 1, f);
+  }
 
-    //escrevendo a informação no novo arquivo
-    for (int i = 0; i < totalDeSenhas-1; i++) {
-        fwrite (&listaDeSenhas[i], sizeof(Senha), 1, f);
-    }
+  fclose(f);
+  // fechando arquivo de escrita
 
-    fclose(f);
-    //fechando arquivo de escrita
-
-    return;
+  return;
 }
 
+int main()
+{
+  FILE *f = fopen("senhas.bin", "ab");
+  int operacao;
 
-int main() {
-    FILE *f = fopen("senhas.bin", "ab");
-    int operacao;
+  do
+  {
+    // prompt que questiona a intenção do usuário
+    printf("\nPor favor, escolha uma das seguintes opcoes:\n\n"
+           "- tecle '0' para encerrar o programa\n"
+           "- tecle '1' para listar as senhas ja cadastradas\n"
+           "- tecle '2' para deletar alguma senha ja cadastrada\n"
+           "- tecle '3' para adicionar uma nova senha\n"
+           "- tecle '4' para alterar dados de uma senha especifica\n\n"
+           "Opcao escolhida: ");
+    scanf("%d", &operacao);
 
-    do {
-        //prompt que questiona a intenção do usuário
-        printf("\nPor favor, escolha uma das seguintes opcoes:\n\n"
-            "- tecle '0' para encerrar o programa\n"
-            "- tecle '1' para listar as senhas ja cadastradas\n"
-            "- tecle '2' para deletar alguma senha ja cadastrada\n"
-            "- tecle '3' para adicionar uma nova senha\n"
-            "- tecle '4' para alterar dados de uma senha especifica\n\n"
-            "Opcao escolhida: ");
-        scanf("%d", &operacao);
+    // As funções chamadas dependerão da escolha do usuário
+    switch (operacao)
+    {
 
+    case 0: // encerrar programa
+      break;
 
-        //As funções chamadas dependerão da escolha do usuário
-        switch (operacao) {
+    case 1:
+      printf("\nListar todas as senhas\n");
+      // A FAZER
+      //
+      // listar(); - aqui deve ficar a função que irá mostras todas as senhas ao usuário
+      // barraDeBusca(); - aqui deve ficar a função que permitirá ao usuário buscar uma senha específica
+      //
+      break;
 
-            case 0: // encerrar programa
-                break;
+    case 2:
+    {
+      int id;
+      int totalDeSenhas = contarSenhas();
 
-            case 1:
-                printf("\nListar todas as senhas\n");
-                //A FAZER
-                //
-                //listar(); - aqui deve ficar a função que irá mostras todas as senhas ao usuário
-                //barraDeBusca(); - aqui deve ficar a função que permitirá ao usuário buscar uma senha específica
-                //
-                break;
+      if (totalDeSenhas == 0)
+      {
+        printf("Nao existe nenhuma senha cadastrada\n");
+        break;
+      }
 
-            case 2: {
-                int id;
-                int totalDeSenhas = contarSenhas();
+      do
+      {
+        // A FAZER
+        //
+        // listar(); - aqui deve ficar a função que irá mostras todas as senhas ao usuário
 
-                if (totalDeSenhas == 0) {
-                    printf("Nao existe nenhuma senha cadastrada\n");
-                    break;
-                }
+        printf("\nQual das senhas acima voce deseja deletar?\n"
+               "Selecione o id da senha escolhida: ");
+        scanf("%d", &id);
 
-                do {
-                    //A FAZER
-                    //
-                    //listar(); - aqui deve ficar a função que irá mostras todas as senhas ao usuário
-
-                    printf("\nQual das senhas acima voce deseja deletar?\n"
-                           "Selecione o id da senha escolhida: ");
-                    scanf("%d", &id);
-
-                    if (id > totalDeSenhas || id < 1) {
-                        printf("\nSenha invalida\n");
-                    }
-
-                } while (id > totalDeSenhas || id < 1);
-
-                deletar(id, totalDeSenhas); //função que permitirá ao usuário deletar uma das senhas listadas
-                break;
-            }
-            case 3:
-                printf("\nAdicionar senha\n");
-                //A FAZER
-                //
-                //adicionar(); - enfim, ces já sabem
-                //
-                break;
-
-            case 4:
-            printf("\nAlterar senha!\n");
-                //A FAZER
-                //
-                //listar(); - aqui deve ficar a função que irá mostras todas as senhas ao usuário
-                //alterarSenha();
-                //
-                break;
-
-            default:
-                printf("\n\n\n\n\n\nOpcao invalida. Por favor, selecione uma das opcoes listadas.\n");
+        if (id > totalDeSenhas || id < 1)
+        {
+          printf("\nSenha invalida\n");
         }
 
-    }while (operacao != 0); // o loop só encerra quando o usuário escolher encerrar
+      } while (id > totalDeSenhas || id < 1);
 
-    printf("\nPrograma encerrado!\n\n");
+      deletar(id, totalDeSenhas); // função que permitirá ao usuário deletar uma das senhas listadas
+      break;
+    }
+    case 3:
+      printf("\nAdicionar senha\n");
+      // A FAZER
+      //
+      // adicionar(); - enfim, ces já sabem
+      //
+      break;
 
-    fclose(f);
+    case 4:
+      printf("\nAlterar senha!\n");
+      // A FAZER
+      //
+      // listar(); - aqui deve ficar a função que irá mostras todas as senhas ao usuário
+      // alterarSenha();
+      //
+      break;
 
-    return 0;
+    default:
+      printf("\n\n\n\n\n\nOpcao invalida. Por favor, selecione uma das opcoes listadas.\n");
+    }
+
+  } while (operacao != 0); // o loop só encerra quando o usuário escolher encerrar
+
+  printf("\nPrograma encerrado!\n\n");
+
+  fclose(f);
+
+  return 0;
+}
+
+void addSenhas()
+{
+  Senha p;
+  char continuar;
+  short tempID = 1;
+  FILE *f = fopen("senhas.bin", "rb"); // lendo binario
+  if (f)                               // Se o arquivo existir eu procuro o p.ID da ultima senha salva e somo 1
+    while (fread(&p, sizeof(Senha), 1, f))
+      tempID = (p.ID > 0) ? p.ID + 1 : 1;
+  fclose(f);
+  f = fopen("senhas.bin", "ab"); // abrindo/criando arquivo modo de escrita
+  do
+  {
+    printf("Digite um titulo para a senha: ");
+    fflush(stdin);
+    gets(p.titulo);
+
+    printf("Digite o seu login: ");
+    fflush(stdin);
+    gets(p.usuario);
+
+    printf("Digite a sua senha: ");
+    fflush(stdin);
+    gets(p.senha);
+    p.ID = tempID;
+    tempID++;
+    fwrite(&p, sizeof(Senha), 1, f); // Salvando as informações passadas pelo user
+
+    printf("\nVoce deseja adicionar mais senhas? (s/n)");
+    continuar = getchar();
+    printf("\n");
+  } while (continuar != 'n');
+
+  fclose(f); // fecha o arquivo /
+
+  f = fopen("senhas.bin", "rb"); // rb � o argumento de leitura para binario
+  if (!f)
+  { // (!f) testa se o resultado da opera��o foi NULL
+    printf("Nao foi possivel abrir o arquivo\n");
+  }
+
+  while (fread(&p, sizeof(Senha), 1, f))
+  { //
+    printf("ID: %d\n", p.ID);
+    printf("%s\n", p.titulo);
+    printf("Login: %s\n", p.usuario);
+    printf("Senha: %s\n", p.senha);
+    printf("\n\n");
+  }
+
+  fclose(f);
 }
