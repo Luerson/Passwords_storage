@@ -123,6 +123,11 @@ int main() {
                 int id;
                 int totalDeSenhas = contarSenhas();
 
+                if (totalDeSenhas == 0) {
+                    printf("Nao existe nenhuma senha cadastrada\n");
+                    break;
+                }
+
                 do {
                     //A FAZER
                     //
