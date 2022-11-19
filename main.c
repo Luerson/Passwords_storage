@@ -36,7 +36,7 @@ void listar(){
   FILE *f;
 
   // abre o arquivo em modo de leitura
-  f = fopen("senhas.bin", "ab");
+  f = fopen("senhas.bin", "r");
 
   // fopen vai retornar NULL se o arquivo estiver vazio
   if (f != NULL){
