@@ -31,7 +31,29 @@ int contarSenhas()
   return contador;
 }
 
-void listar();    // principal
+void listar(){
+  // arq é o handle que usamos para acessar o arquivo
+  FILE *f;
+
+  // abre o arquivo em modo de leitura
+  f = fopen("senhas.bin", "ab");
+
+  // fopen vai retornar NULL se o arquivo estiver vazio
+  if (f != NULL){
+    // Ler cada caracter do arquivo até o final do arquivo (EOF) is
+    // EOF marca que foi alcançado o final do arquivo
+    char c;
+    while ( (c = fgetc(f)) != EOF )
+    // Faz output de cada caracter para o console
+      putchar(c);
+
+    // fecha o gerenciador de arquivos
+    fclose(f);
+  }
+  // Se teve um erro ao abrir o arquivo, avisa ao usuario
+  else printf("Erro ao abrir arquivo.\n");
+};    // principal
+
 void adicionar(); // principal
 
 // void barraDeBusca(); - Secundário
