@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <time.h>
+#include <string.h>
 
 typedef struct
 {
@@ -59,7 +62,56 @@ void adicionar(); // principal
 // void barraDeBusca(); - Secundário
 // void alterarSenha(); - Secundário
 
-// criarSenha() -- Se der tempo!!!!!
+// Função para gerar uma senha aleatória com uma quantidade N de caracteres
+void senhaAleatoria(int N, char *s)
+{
+	// Inicializa o contador
+	int i = 0;
+
+	int gerador = 0;
+
+	// Alimentar o gerador aleatório
+	// com o horario atual
+	// para que os numeros sejam diferentes
+	srand((unsigned int)(time(NULL)));
+
+	// Array de numeros
+	char numeros[] = "0123456789";
+
+	// Array de letras minusculas
+	char letras[] = "abcdefghijklmnoqprstuvwyzx";
+
+	// Array de letras maiusculas
+	char LETRAS[] = "ABCDEFGHIJKLMNOQPRSTUYWVZX";
+
+	// Array de simbolos especiais
+	char simbolos[] = "!@#$^&*?";
+
+	// Fazer que ele percorra do indice 0 ao N-1
+	for (i = 0; i < N; i++) {
+
+		if (gerador == 1) {
+			s[i] = numeros[rand() % 10];
+			gerador = rand() % 4;
+			printf("%c", s[i]);
+		}
+		else if (gerador == 2) {
+			s[i] = simbolos[rand() % 8];
+			gerador = rand() % 4;
+			printf("%c", s[i]);
+		}
+		else if (gerador == 3) {
+			s[i] = LETRAS[rand() % 26];
+			gerador = rand() % 4;
+			printf("%c", s[i]);
+		}
+		else {
+			s[i] = letras[rand() % 26];
+			gerador = rand() % 4;
+			printf("%c", s[i]);
+		}
+	}
+}
 
 void deletar(int id, int totalDeSenhas)
 {
