@@ -4,6 +4,7 @@
 #include <time.h>
 #include <string.h>
 
+//Estrutura de cada senha
 typedef struct
 {
   int ID;
@@ -11,9 +12,120 @@ typedef struct
   char usuario[20];
   char senha[20];
 } Senha;
+//-----------------------
 
-// Criei essa função porque eu e Klayvert vamos ter que usar esse trecho
-// de código novamente na função alterarSenha().
+
+
+//--------------------------------------
+//Funções principais
+void listar();
+void addSenhas();
+void deletar(int totalDeSenhas);
+
+//Funções auxiliares
+int contarSenhas();
+void barraDeBusca();
+void senhaAleatoria(int N, char *s);
+//--------------------------------------
+
+
+
+int main()
+{
+  FILE *f = fopen("senhas.bin", "ab");
+  int totalDeSenhas;
+  int operacao;
+
+  do
+  {
+    totalDeSenhas = contarSenhas();
+    // prompt que questiona a intenção do usuário
+    printf("\nPor favor, escolha uma das seguintes opcoes:\n\n"
+           "- tecle '0' para encerrar o programa\n"
+           "- tecle '1' para listar as senhas ja cadastradas\n"
+           "- tecle '2' para deletar alguma senha ja cadastrada\n"
+           "- tecle '3' para adicionar uma nova senha\n"
+           "- tecle '4' para alterar dados de uma senha especifica\n\n"
+           "Opcao escolhida: ");
+    scanf("%d", &operacao);
+
+    // As funções chamadas dependerão da escolha do usuário
+    switch (operacao)
+    {
+      //Inicio Case 0-----------------------------
+      case 0: // encerrar programa
+        break;
+      //FIM CASE 0------------------------------
+
+
+
+      //Inicio Case 1-----------------------------
+      case 1:
+      if (totalDeSenhas)
+        {
+          listar();
+          barraDeBusca();
+        }
+        else
+        {
+          printf("\nNao existe nenhuma senha cadastrada\n");
+        }
+        break;
+      //FIM CASE 1------------------------------
+
+
+
+      //Inicio Case 2-----------------------------
+      case 2:
+        if (totalDeSenhas)
+        {
+          deletar(totalDeSenhas);
+        }
+        else
+        {
+          printf("\nNao existe nenhuma senha cadastrada\n");
+        }
+        break;
+      //FIM CASE 2------------------------------
+
+
+
+      //Inicio Case 3-----------------------------
+      case 3:
+        addSenhas();
+        break;
+      //FIM CASE 3------------------------------
+
+
+
+      //Inicio Case 4-----------------------------
+      case 4:
+        printf("\nAlterar senha!\n");
+        // A FAZER
+        //
+        // listar(); - aqui deve ficar a função que irá mostras todas as senhas ao usuário
+        // alterarSenha();
+        //
+        break;
+      //FIM CASE 4------------------------------
+
+
+
+      default:
+        printf("\n\n\n\n\n\nOpcao invalida. Por favor, selecione uma das opcoes listadas.\n");
+    }
+  } while (operacao != 0); // o loop só encerra quando o usuário escolher encerrar
+
+  printf("\nPrograma encerrado!\n\n");
+
+  fclose(f);
+
+  return 0;
+}
+
+
+
+//------------------------------------------------------
 int contarSenhas()
 {
   FILE *f = fopen("senhas.bin", "rb"); // apenas leitura
@@ -33,8 +145,13 @@ int contarSenhas()
   }
   return contador;
 }
+//------------------------------------------------------
 
-void listar(){
+
+
+//------------------------------------------------------
+void listar()
+{
 
     Senha p;
 
@@ -58,8 +175,13 @@ void listar(){
     // Fecha o arquivo
     fclose(f);
 }
+//------------------------------------------------------
 
-void barraDeBusca(){
+
+
+//------------------------------------------------------
+void barraDeBusca()
+{
     int opc;
     Senha p;
     char titulo[50];
@@ -92,7 +214,7 @@ void barraDeBusca(){
                 printf("----------------------------");
                 printf("\n\n");
             }
-        }
+          }
         }
 
         else if(opc==2){
@@ -116,10 +238,9 @@ void barraDeBusca(){
 
     fclose(f);
 }
+//------------------------------------------------------
 
-void adicionar(); // principal
 
-// void alterarSenha(); - Secundário
 
 // Função para gerar uma senha aleatória com uma quantidade N de caracteres
 void senhaAleatoria(int N, char *s)
@@ -171,13 +292,33 @@ void senhaAleatoria(int N, char *s)
 		}
 	}
 }
+//------------------------------------------------------
 
-void deletar(int id, int totalDeSenhas)
+
+
+//------------------------------------------------------
+void deletar(int totalDeSenhas)
 {
   FILE *f;
   Senha senha;
   Senha listaDeSenhas[totalDeSenhas - 1];
   int deletados = 0;
+  int id;
+
+  do
+  {
+    listar();
+
+    printf("\nQual das senhas acima voce deseja deletar?\n"
+          "Selecione o id da senha escolhida: ");
+    scanf("%d", &id);
+
+    if (id > totalDeSenhas || id < 1)
+    {
+      printf("\nSenha invalida\n");
+    }
+
+  } while (id > totalDeSenhas || id < 1);
 
   f = fopen("senhas.bin", "rb");
 
@@ -228,101 +369,11 @@ void deletar(int id, int totalDeSenhas)
 
   return;
 }
+//------------------------------------------------------
 
-int main()
-{
-  FILE *f = fopen("senhas.bin", "ab");
-  int operacao;
 
-  do
-  {
-    // prompt que questiona a intenção do usuário
-    printf("\nPor favor, escolha uma das seguintes opcoes:\n\n"
-           "- tecle '0' para encerrar o programa\n"
-           "- tecle '1' para listar as senhas ja cadastradas\n"
-           "- tecle '2' para deletar alguma senha ja cadastrada\n"
-           "- tecle '3' para adicionar uma nova senha\n"
-           "- tecle '4' para alterar dados de uma senha especifica\n\n"
-           "Opcao escolhida: ");
-    scanf("%d", &operacao);
 
-    // As funções chamadas dependerão da escolha do usuário
-    switch (operacao)
-    {
-
-    case 0: // encerrar programa
-      break;
-
-    case 1:
-      printf("\nListar todas as senhas\n");
-      // A FAZER
-      //
-      // listar(); - aqui deve ficar a função que irá mostras todas as senhas ao usuário
-      // barraDeBusca(); - aqui deve ficar a função que permitirá ao usuário buscar uma senha específica
-      //
-      break;
-
-    case 2:
-    {
-      int id;
-      int totalDeSenhas = contarSenhas();
-
-      if (totalDeSenhas == 0)
-      {
-        printf("Nao existe nenhuma senha cadastrada\n");
-        break;
-      }
-
-      do
-      {
-        // A FAZER
-        //
-        // listar(); - aqui deve ficar a função que irá mostras todas as senhas ao usuário
-
-        printf("\nQual das senhas acima voce deseja deletar?\n"
-               "Selecione o id da senha escolhida: ");
-        scanf("%d", &id);
-
-        if (id > totalDeSenhas || id < 1)
-        {
-          printf("\nSenha invalida\n");
-        }
-
-      } while (id > totalDeSenhas || id < 1);
-
-      deletar(id, totalDeSenhas); // função que permitirá ao usuário deletar uma das senhas listadas
-      break;
-    }
-    case 3:
-      printf("\nAdicionar senha\n");
-      // A FAZER
-      //
-      // adicionar(); - enfim, ces já sabem
-      //
-      break;
-
-    case 4:
-      printf("\nAlterar senha!\n");
-      // A FAZER
-      //
-      // listar(); - aqui deve ficar a função que irá mostras todas as senhas ao usuário
-      // alterarSenha();
-      //
-      break;
-
-    default:
-      printf("\n\n\n\n\n\nOpcao invalida. Por favor, selecione uma das opcoes listadas.\n");
-    }
-
-  } while (operacao != 0); // o loop só encerra quando o usuário escolher encerrar
-
-  printf("\nPrograma encerrado!\n\n");
-
-  fclose(f);
-
-  return 0;
-}
-
+//------------------------------------------------------
 void addSenhas()
 {
   Senha p;
@@ -375,3 +426,4 @@ void addSenhas()
 
   fclose(f);
 }
+//------------------------------------------------------
