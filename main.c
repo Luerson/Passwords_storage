@@ -18,14 +18,17 @@ typedef struct
 
 //--------------------------------------
 //Funções principais
-void listar();
-void addSenhas();
-void deletar(int totalDeSenhas);
+void listar(); // Lista todas as senhas já cadastradas
+void addSenhas(); // Adiciona uma senha com dados informados pelo usuário
+void barraDeBusca(); // O usuário insere informação de uma das senhas para listar especificamente a que ele quer
+void deletar(int totalDeSenhas); // deleta uma senha escolhida pelo usuário
+void alterarSenha(int totalDeSenhas); // Altera os dados de uma senha selecionada pelo usuário
 
 //Funções auxiliares
-int contarSenhas();
-void barraDeBusca();
-void senhaAleatoria(int N, char *s);
+int contarSenhas(); // Conta o total de senhas cadastradas
+void senhaAleatoria(int N, char *s); // Gera uma senha aleatória (Não uma struct Senha, mas uma variável Senha.senha)
+void gerarArquivo(Senha listaDeSenhas[], int totalDeSenhas); // Cria cria um arquivo com os dados armazenados em 'listaDeSenhas'
+int adquireID(int totalDeSenhas); // usa o prompt para adquirir o id da senha de interesse do usuário
 //--------------------------------------
 
 
@@ -39,6 +42,7 @@ int main()
   do
   {
     totalDeSenhas = contarSenhas();
+
     // prompt que questiona a intenção do usuário
     printf("\nPor favor, escolha uma das seguintes opcoes:\n\n"
            "- tecle '0' para encerrar o programa\n"
@@ -100,12 +104,14 @@ int main()
 
       //Inicio Case 4-----------------------------
       case 4:
-        printf("\nAlterar senha!\n");
-        // A FAZER
-        //
-        // listar(); - aqui deve ficar a função que irá mostras todas as senhas ao usuário
-        // alterarSenha();
-        //
+      if (totalDeSenhas) {
+        alterarSenha(totalDeSenhas);
+      }
+      else
+      {
+        printf("\nNao existe nenhuma senha cadastrada\n");
+      }
+        
         break;
       //FIM CASE 4------------------------------
 
@@ -187,7 +193,7 @@ void barraDeBusca()
     char titulo[50];
     char usuario[20];
 
-    printf("Escolha se tipo de busca: \n");
+    printf("Escolha o tipo de busca: \n");
     printf("1 - Pesquisar por titulo. \n");
     printf("2 - Pesquisar por usuario. \n");
     scanf("%d", &opc);
@@ -305,20 +311,7 @@ void deletar(int totalDeSenhas)
   int deletados = 0;
   int id;
 
-  do
-  {
-    listar();
-
-    printf("\nQual das senhas acima voce deseja deletar?\n"
-          "Selecione o id da senha escolhida: ");
-    scanf("%d", &id);
-
-    if (id > totalDeSenhas || id < 1)
-    {
-      printf("\nSenha invalida\n");
-    }
-
-  } while (id > totalDeSenhas || id < 1);
+  id = adquireID(totalDeSenhas);
 
   f = fopen("senhas.bin", "rb");
 
@@ -336,6 +329,7 @@ void deletar(int totalDeSenhas)
 
     if (senha.ID != id)
     {
+      senha.ID = i + 1 - deletados;
       listaDeSenhas[i - deletados] = senha;
     }
     else
@@ -347,25 +341,7 @@ void deletar(int totalDeSenhas)
   fclose(f);
   // fechando aruivo de leitura
 
-  // abrindo arquivo de escrita. Esse método destroi
-  // todo conteúdo do arquivo original, mas as informações
-  // desejadas contiuam salvas no vetor 'listaDeSenhas[]'
-  f = fopen("senhas.bin", "wb");
-
-  if (f == NULL)
-  {
-    printf("\nErro! Nao foi possivel criar o arquivo\n");
-    exit(3);
-  }
-
-  // escrevendo a informação no novo arquivo
-  for (int i = 0; i < totalDeSenhas - 1; i++)
-  {
-    fwrite(&listaDeSenhas[i], sizeof(Senha), 1, f);
-  }
-
-  fclose(f);
-  // fechando arquivo de escrita
+  gerarArquivo(listaDeSenhas, totalDeSenhas-1);
 
   return;
 }
@@ -427,3 +403,105 @@ void addSenhas()
   fclose(f);
 }
 //------------------------------------------------------
+
+
+
+//------------------------------------------------------
+void alterarSenha(int totalDeSenhas) {
+  FILE *f;
+  Senha senha;
+  Senha listaDeSenhas[totalDeSenhas];
+  int id;
+
+  id = adquireID(totalDeSenhas);
+
+  f = fopen("senhas.bin", "rb");
+
+  if (f == NULL)
+  {
+    printf("\nErro! Nao foi possivel criar o arquivo\n");
+    exit(2);
+  }
+
+  // Esse 'for' armazena todas as senhas em um vetor de senhas,
+  // mas altera a que o usuário selecionar
+  for (int i = 0; i < totalDeSenhas; i++)
+  {
+    fread(&senha, sizeof(Senha), 1, f);
+
+    if (senha.ID == id)
+    {
+      printf("Digite um novo titulo para a senha: ");
+      fflush(stdin);
+      gets(senha.titulo);
+
+      printf("Digite o seu novo login: ");
+      fflush(stdin);
+      gets(senha.usuario);
+
+      printf("Digite a sua nova senha: ");
+      fflush(stdin);
+      gets(senha.senha);
+
+      senha.ID = id;
+    }
+
+    listaDeSenhas[i] = senha;
+  }
+
+  fclose(f);
+
+  gerarArquivo(listaDeSenhas, totalDeSenhas);
+
+  return;
+}
+//------------------------------------------------------
+
+
+
+//------------------------------------------------------
+void gerarArquivo(Senha listaDeSenhas[], int totalDeSenhas) {
+  FILE *f = fopen("senhas.bin", "wb");
+
+  if (f == NULL)
+  {
+    printf("\nErro! Nao foi possivel criar o arquivo\n");
+    exit(3);
+  }
+
+  // escrevendo a informação no novo arquivo
+  for (int i = 0; i < totalDeSenhas; i++)
+  {
+    fwrite(&listaDeSenhas[i], sizeof(Senha), 1, f);
+  }
+
+  fclose(f);
+  // fechando arquivo de escrita
+
+  return;
+}
+//------------------------------------------------------
+
+
+
+//------------------------------------------------------
+int adquireID(int totalDeSenhas) {
+  int id;
+
+  do
+  {
+    listar();
+
+    printf("\nQual das senhas acima voce deseja selecionar?\n"
+          "id da senha escolhida: ");
+    scanf("%d", &id);
+
+    if (id > totalDeSenhas || id < 1)
+    {
+      printf("\nSenha invalida\n");
+    }
+
+  } while (id > totalDeSenhas || id < 1);
+
+  return id;
+}
