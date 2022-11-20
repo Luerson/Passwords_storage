@@ -35,31 +35,90 @@ int contarSenhas()
 }
 
 void listar(){
-  // arq é o handle que usamos para acessar o arquivo
-  FILE *f;
 
-  // abre o arquivo em modo de leitura
-  f = fopen("senhas.bin", "r");
+    Senha p;
 
-  // fopen vai retornar NULL se o arquivo estiver vazio
-  if (f != NULL){
-    // Ler cada caracter do arquivo até o final do arquivo (EOF) is
-    // EOF marca que foi alcançado o final do arquivo
-    char c;
-    while ( (c = fgetc(f)) != EOF )
-    // Faz output de cada caracter para o console
-      putchar(c);
+    FILE *f = fopen("senhas.bin", "rb");
 
-    // fecha o gerenciador de arquivos
+    if (f==NULL){// Testar se o arquivo e NULL
+        printf("Nao foi possivel abrir o arquivo\n");
+    }
+
+    else{// Repetir enquanto o programa conseguir ler uma linha do arquivo
+        while(fread(&p, sizeof(Senha), 1, f)==1){
+            printf("----------------------------\n");
+            printf("ID: %d\n", p.ID);
+            printf("%s\n", p.titulo);
+            printf("Login: %s\n", p.usuario);
+            printf("Senha: %s\n", p.senha);
+            printf("----------------------------");
+            printf("\n\n");
+        }
+    }
+    // Fecha o arquivo
     fclose(f);
-  }
-  // Se teve um erro ao abrir o arquivo, avisa ao usuario
-  else printf("Erro ao abrir arquivo.\n");
-};    // principal
+}
+
+void barraDeBusca(){
+    int opc;
+    Senha p;
+    char titulo[50];
+    char usuario[20];
+
+    printf("Escolha se tipo de busca: \n");
+    printf("1 - Pesquisar por titulo. \n");
+    printf("2 - Pesquisar por usuario. \n");
+    scanf("%d", &opc);
+
+    FILE *f = fopen("senhas.bin", "rb");
+
+    if (f==NULL){// Testa se o arquivo e NULL
+        printf("Nao foi possivel abrir o arquivo\n");
+    }
+
+    else{
+        if(opc==1){
+        fflush(stdin);
+        printf("Digite o titulo a pesquisar: ");
+        gets(titulo);
+
+        while(fread(&p, sizeof(Senha), 1, f)==1){
+            if(strcmp(titulo, p.titulo)==0){// Compara duas strings e mostra quando elas forem iguais
+                printf("----------------------------\n");
+                printf("ID: %d\n", p.ID);
+                printf("%s\n", p.titulo);
+                printf("Login: %s\n", p.usuario);
+                printf("Senha: %s\n", p.senha);
+                printf("----------------------------");
+                printf("\n\n");
+            }
+        }
+        }
+
+        else if(opc==2){
+        fflush(stdin);
+        printf("Digite o usuario a pesquisar: ");
+        gets(usuario);
+
+        while(fread(&p, sizeof(Senha), 1, f)==1){
+            if(strcmp(usuario, p.usuario)==0){
+                printf("\n\n----------------------------\n");
+                printf("ID: %d\n", p.ID);
+                printf("%s\n", p.titulo);
+                printf("Login: %s\n", p.usuario);
+                printf("Senha: %s\n", p.senha);
+                printf("----------------------------");
+                printf("\n\n");
+            }
+        }
+        }
+    }
+
+    fclose(f);
+}
 
 void adicionar(); // principal
 
-// void barraDeBusca(); - Secundário
 // void alterarSenha(); - Secundário
 
 // Função para gerar uma senha aleatória com uma quantidade N de caracteres
