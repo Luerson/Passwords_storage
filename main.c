@@ -4,9 +4,9 @@
 #include <time.h>
 #include <string.h>
 #include <ctype.h>
-#include <openssl/ssl.h>
+/* #include <openssl/ssl.h>
 #include <openssl/err.h>
-#include <openssl/sha.h>
+#include <openssl/sha.h> */
 
 // Estrutura de cada senha
 typedef struct
@@ -35,7 +35,7 @@ int acquireID(int totalDeSenhas);                            // usa o prompt par
 
 //  --- CÓDIGO NÃO FINALIZADO
 // Criptografar plaintext e escrever em ciphertext usando uma senha e sha-512
-void encrypt(char* password, char* plaintext, char* ciphertext) {
+/* void encrypt(char* password, char* plaintext, char* ciphertext) {
   unsigned char salt[8] = {0};
   unsigned char key[64];
   unsigned char iv[16];
@@ -115,18 +115,11 @@ void decrypt(char* password, char* ciphertext, char* plaintext) {
   EVP_CIPHER_CTX_free(ctx);
 
   plaintext[ptlen] = '\0';
-}
+} */
 //  --- CÓDIGO NÃO FINALIZADO
 
 int main()
 { 
-  char ciphertext[1024];
-  encrypt("password", "plaintext", ciphertext);
-  printf("ciphertext: %s\n", ciphertext);
-  char plaintext[1024];
-  decrypt("password", ciphertext, plaintext);
-  printf("plaintext: %s\n", plaintext);
-
   FILE *f = fopen("senhas.bin", "ab");
   int totalDeSenhas;
   int operacao;
