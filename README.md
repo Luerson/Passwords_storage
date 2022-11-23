@@ -1,2 +1,3 @@
-# UFPB_Projeto_Introdu-o_ao_Computador
-projeto da cadeira de Introdução ao computador da UFPB
+# UFPB Projeto Introdução ao Computador 🖥️
+
+Projeto da cadeira de Introdução ao computador da UFPB.
