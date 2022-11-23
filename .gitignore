@@ -50,3 +50,12 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Senhas
+senhas.bin
+.backup
+ciphertext
+# Configurações do vscode
+.vscode/
+# Executável do Linux (sem .exe)
+main
