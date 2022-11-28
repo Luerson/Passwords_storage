@@ -601,9 +601,12 @@ void alterarSenha(int totalDeSenhas)
       fflush(stdin);
       gets(senha.usuario);
 
+      char tempSenha[20];
       printf("Digite a sua nova senha: ");
       fflush(stdin);
-      gets(senha.senha);
+      gets(tempSenha);
+
+      criptografar(tempSenha, senha.senha, senhaMestra);
 
       senha.ID = id;
     }
