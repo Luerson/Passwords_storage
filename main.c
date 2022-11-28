@@ -4,9 +4,6 @@
 #include <time.h>
 #include <string.h>
 #include <ctype.h>
-/* #include <openssl/ssl.h>
-#include <openssl/err.h>
-#include <openssl/sha.h> */
 
 // Estrutura de cada senha
 typedef struct
@@ -20,107 +17,145 @@ typedef struct
 
 //--------------------------------------
 // Funções principais
-void listar();                        // Lista todas as senhas já cadastradas
-void addSenhas();                     // Adiciona uma senha com dados informados pelo usuário
-void barraDeBusca();                  // O usuário insere informação de uma das senhas para listar especificamente a que ele quer
-void deletar(int totalDeSenhas);      // deleta uma senha escolhida pelo usuário
-void alterarSenha(int totalDeSenhas); // Altera os dados de uma senha selecionada pelo usuário
+void listar();                               // Lista todas as senhas já cadastradas
+void addSenhas();                            // Adiciona uma senha com dados informados pelo usuário
+void barraDeBusca();                         // O usuário insere informação de uma das senhas para listar especificamente a que ele quer
+void deletar(int totalDeSenhas);             // deleta uma senha escolhida pelo usuário
+void alterarSenha(int totalDeSenhas);        // Altera os dados de uma senha selecionada pelo usuário
+void alterarSenhaMestra(int totalDeSenhas);  // Altera a senha mestra
 
 // Funções auxiliares
 int contarSenhas();                                          // Conta o total de senhas cadastradas
 void senhaAleatoria(int N, char *s);                         // Gera uma senha aleatória (Não uma struct Senha, mas uma variável Senha.senha)
 void gerarArquivo(Senha listaDeSenhas[], int totalDeSenhas); // Cria cria um arquivo com os dados armazenados em 'listaDeSenhas'
+void criptografar(char *input, char *dest, char *senha);     // Encripta o input usando uma senha e escreve o resultado na string dest.
+void descriptografar(char *input, char *dest, char *senha);  // Encripta o input usando uma senha e escreve o resultado na string dest.
 int acquireID(int totalDeSenhas);                            // usa o prompt para adquirir o id da senha de interesse do usuário
 //--------------------------------------
 
 //  --- CÓDIGO NÃO FINALIZADO
-// Criptografar plaintext e escrever em ciphertext usando uma senha e sha-512
-/* void encrypt(char* password, char* plaintext, char* ciphertext) {
-  unsigned char salt[8] = {0};
-  unsigned char key[64];
-  unsigned char iv[16];
-  unsigned char tag[16];
-  unsigned char aad[20];
-  unsigned char* pt = (unsigned char*)plaintext;
-  unsigned char* ct = (unsigned char*)ciphertext;
-  int ptlen = strlen(plaintext);
-  int ctlen, tmplen;
-  int i;
+// Encripta o input usando uma senha e escreve o resultado na string dest.
+void criptografar(char *input, char *dest, char *senha)
+{
+  int senhaIndex = 0;
 
-  // gerar salt
-  RAND_bytes(salt, 8);
+  char senhaNumerica[100];
+  sprintf(senhaNumerica, "%d", strlen(senha));
 
-  // gerar key
-  PKCS5_PBKDF2_HMAC_SHA1(password, strlen(password), salt, 8, 100000, 64, key);
+  char num[10];
+  for (int i = 0; i < strlen(senha); i++)
+  {
+    sprintf(num, "%d", (int)senha[i]);
+    strcat(senhaNumerica, num);
+  }
+  senhaNumerica[strlen(senhaNumerica)] = '\0';
 
-  // gerar iv
-  RAND_bytes(iv, 16);
+  for (int i = 0; i < strlen(input); i++)
+  {
+    int num = senhaNumerica[senhaIndex] - '0';
 
-  // gerar aad
-  RAND_bytes(aad, 20);
+    dest[i] = (char)((int)input[i] + num);
 
-  // criptografar
-  EVP_CIPHER_CTX* ctx;
-  ctx = EVP_CIPHER_CTX_new();
-  EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL);
-  EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, 16, NULL);
-  EVP_EncryptInit_ex(ctx, NULL, NULL, key, iv);
-  EVP_EncryptUpdate(ctx, NULL, &tmplen, aad, 20);
-  EVP_EncryptUpdate(ctx, ct, &tmplen, pt, ptlen);
-  ctlen = tmplen;
-  EVP_EncryptFinal_ex(ctx, ct + ctlen, &tmplen);
-  ctlen += tmplen;
-  EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag);
-  EVP_CIPHER_CTX_free(ctx);
-
-  // escrever salt, iv, tag, e ciphertext em ciphertext
-  memcpy(ciphertext, salt, 8);
-  memcpy(ciphertext + 8, iv, 16);
-  memcpy(ciphertext + 24, tag, 16);
-  memcpy(ciphertext + 40, ct, ctlen);
-  ciphertext[40 + ctlen] = '\0';
+    if (senhaIndex == strlen(senha))
+    {
+      senhaIndex = 0;
+    }
+    else
+    {
+      senhaIndex++;
+    }
+  }
+  dest[strlen(input)] = '\0';
 }
 
-// decriptografar usando sha-512
-void decrypt(char* password, char* ciphertext, char* plaintext) {
-  unsigned char salt[8];
-  unsigned char key[64];
-  unsigned char iv[16];
-  unsigned char tag[16];
-  unsigned char aad[20];
-  unsigned char* ct = (unsigned char*)ciphertext + 40;
-  unsigned char* pt = (unsigned char*)plaintext;
-  int ptlen, tmplen;
-  int i;
+void descriptografar(char *input, char *dest, char *senha)
+{
+  int senhaIndex = 0;
 
-  // ler salt, iv, tag, e ciphertext do ciphertext
-  memcpy(salt, ciphertext, 8);
-  memcpy(iv, ciphertext + 8, 16);
-  memcpy(tag, ciphertext + 24, 16);
+  char senhaNumerica[100];
+  sprintf(senhaNumerica, "%d", strlen(senha));
 
-  // gerar key
-  PKCS5_PBKDF2_HMAC_SHA1(password, strlen(password), salt, 8, 100000, 64, key);
+  char num[10];
+  for (int i = 0; i < strlen(senha); i++)
+  {
+    sprintf(num, "%d", (int)senha[i]);
+    strcat(senhaNumerica, num);
+  }
+  senhaNumerica[strlen(senhaNumerica)] = '\0';
 
-  // descriptografar
-  EVP_CIPHER_CTX* ctx;
-  ctx = EVP_CIPHER_CTX_new();
-  EVP_DecryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL);
-  EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, 16, NULL);
-  EVP_DecryptInit_ex(ctx, NULL, NULL, key, iv);
-  EVP_DecryptUpdate(ctx, NULL, &tmplen, aad, 20);
-  EVP_DecryptUpdate(ctx, pt, &tmplen, ct, strlen(ciphertext) - 40);
-  ptlen = tmplen;
-  EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16, tag);
-  EVP_DecryptFinal_ex(ctx, pt + ptlen, &tmplen);
-  EVP_CIPHER_CTX_free(ctx);
+  for (int i = 0; i < strlen(input); i++)
+  {
+    int num = senhaNumerica[senhaIndex] - '0';
 
-  plaintext[ptlen] = '\0';
-} */
-//  --- CÓDIGO NÃO FINALIZADO
+    dest[i] = (char)((int)input[i] - num);
+
+    if (senhaIndex == strlen(senha))
+    {
+      senhaIndex = 0;
+    }
+    else
+    {
+      senhaIndex++;
+    }
+  }
+  dest[strlen(input)] = '\0';
+}
+
+char senhaMestra[100];
 
 int main()
-{ 
+{
   FILE *f = fopen("senhas.bin", "ab");
+  FILE *fm = fopen("senha_mestra.bin", "rb+");
+  if (fm == NULL)
+  {
+    fm = fopen("senha_mestra.bin", "wb+");
+  }
+
+  char senhaLida[100];
+  char c;
+  int count = 0;
+  while (fread(&c, sizeof(char), 1, fm) == 1)
+  {
+    senhaLida[count] = c;
+    count++;
+  }
+
+  fseek(fm, 0, SEEK_END);
+  if (ftell(fm) == 0)
+  {
+    fseek(fm, 0, SEEK_SET);
+    printf("\nBem vindo ao armazenador de senhas, já que esta é sua primeira vez acessando o programa, por favor, escolha uma senha mestra que será utilizada para acessar as outras senhas aqui guardadas: ");
+    scanf("%s", senhaMestra);
+
+    char senhaCriptografada[100];
+    criptografar(senhaMestra, senhaCriptografada, senhaMestra);
+    fwrite(senhaCriptografada, 1, strlen(senhaCriptografada) * sizeof(char), fm);
+  }
+  else
+  {
+    fseek(fm, 0, SEEK_SET);
+    char senhaMestraInserida[100];
+    printf("\nPara acessar este programa, por favor insira a senha mestra: ");
+    scanf("%s", senhaMestraInserida);
+
+    char senhaArmazenadaDescriptografada[100];
+    descriptografar(senhaLida, senhaArmazenadaDescriptografada, senhaMestraInserida);
+
+    while (strcmp(senhaArmazenadaDescriptografada, senhaMestraInserida) != 0)
+    {
+      printf("Senha incorreta.\n");
+      printf("Para acessar este programa, por favor insira a senha mestra: ");
+      scanf("%s", senhaMestraInserida);
+      descriptografar(senhaLida, senhaArmazenadaDescriptografada, senhaMestraInserida);
+    }
+
+    printf("Senha correta.\n");
+    strcpy(senhaMestra, senhaArmazenadaDescriptografada);
+  }
+
+  fclose(fm);
+
   int totalDeSenhas;
   int operacao;
 
@@ -204,7 +239,14 @@ int main()
       {
         printf("\nNao existe nenhuma senha cadastrada\n");
       }
-      // FIM CASE 4------------------------------
+      break;
+    // FIM CASE 4------------------------------
+
+    // INICIO CASE 6-----------------------------
+    case 6:
+      alterarSenhaMestra(totalDeSenhas);
+      break;
+    // FIM CASE 6------------------------------
 
     default:
       printf("\nOpcao invalida. Por favor, selecione uma das opcoes listadas.\n");
@@ -255,11 +297,14 @@ void listar()
   { // Repetir enquanto o programa conseguir ler uma linha do arquivo
     while (fread(&p, sizeof(Senha), 1, f) == 1)
     {
+      char senhaDescriptografada[20];
+      descriptografar(p.senha, senhaDescriptografada, senhaMestra);
+
       printf("----------------------------\n");
       printf("ID: %d\n", p.ID);
       printf("%s\n", p.titulo);
       printf("Login: %s\n", p.usuario);
-      printf("Senha: %s\n", p.senha);
+      printf("Senha: %s\n", senhaDescriptografada);
       printf("----------------------------");
       printf("\n\n");
     }
@@ -300,11 +345,14 @@ void barraDeBusca()
       {
         if (strcmp(titulo, p.titulo) == 0)
         { // Compara duas strings e mostra quando elas forem iguais
+          char senhaDescriptografada[20];
+          descriptografar(p.senha, senhaDescriptografada, senhaMestra);
+
           printf("----------------------------\n");
           printf("ID: %d\n", p.ID);
           printf("%s\n", p.titulo);
           printf("Login: %s\n", p.usuario);
-          printf("Senha: %s\n", p.senha);
+          printf("Senha: %s\n", senhaDescriptografada);
           printf("----------------------------");
           printf("\n\n");
         }
@@ -321,11 +369,14 @@ void barraDeBusca()
       {
         if (strcmp(usuario, p.usuario) == 0)
         {
+          char senhaDescriptografada[20];
+          descriptografar(p.senha, senhaDescriptografada, senhaMestra);
+
           printf("\n\n----------------------------\n");
           printf("ID: %d\n", p.ID);
           printf("%s\n", p.titulo);
           printf("Login: %s\n", p.usuario);
-          printf("Senha: %s\n", p.senha);
+          printf("Senha: %s\n", senhaDescriptografada);
           printf("----------------------------");
           printf("\n\n");
         }
@@ -362,30 +413,34 @@ void senhaAleatoria(int N, char *s)
   // Array de simbolos especiais.
   char simbolos[] = "!@#$^&*?";
 
+  char tempSenha[20];
+
   // Fazer que ele percorra do indice 0 ao N-1
   for (i = 0; i < N; i++)
   {
     if (gerador == 1)
     {
-      s[i] = numeros[rand() % 10];
+      tempSenha[i] = numeros[rand() % 10];
       gerador = rand() % 4;
     }
     else if (gerador == 2)
     {
-      s[i] = simbolos[rand() % 8];
+      tempSenha[i] = simbolos[rand() % 8];
       gerador = rand() % 4;
     }
     else if (gerador == 3)
     {
-      s[i] = LETRAS[rand() % 26];
+      tempSenha[i] = LETRAS[rand() % 26];
       gerador = rand() % 4;
     }
     else
     {
-      s[i] = letras[rand() % 26];
+      tempSenha[i] = letras[rand() % 26];
       gerador = rand() % 4;
     }
   }
+
+  criptografar(tempSenha, s, senhaMestra);
 }
 //------------------------------------------------------
 
@@ -476,7 +531,7 @@ void addSenhas()
     }
     else
     {
-      strcpy(p.senha, tempSenha);
+      criptografar(tempSenha, p.senha, senhaMestra);
     }
 
     p.ID = tempID;
@@ -498,10 +553,13 @@ void addSenhas()
 
   while (fread(&p, sizeof(Senha), 1, f))
   {
+    char senhaDescriptografada[20];
+    descriptografar(p.senha, senhaDescriptografada, senhaMestra);
+
     printf("ID: %d\n", p.ID);
     printf("%s\n", p.titulo);
     printf("Login: %s\n", p.usuario);
-    printf("Senha: %s\n", p.senha);
+    printf("Senha: %s\n", senhaDescriptografada);
     printf("\n\n");
   }
 
@@ -560,6 +618,54 @@ void alterarSenha(int totalDeSenhas)
   return;
 }
 //------------------------------------------------------
+
+void alterarSenhaMestra(int totalDeSenhas)
+{
+  char novaSenhaMestra[100];
+  Senha listaDeSenhas[totalDeSenhas];
+  Senha p;
+  FILE *f = fopen("senhas.bin", "rb+");
+  FILE *fm;
+  
+  printf("\nInsira a nova senha mestra: ");
+  scanf("%s", novaSenhaMestra);
+
+  if (f == NULL)
+  {
+    // Testar se o arquivo e NULL
+    printf("Nao foi possivel abrir o arquivo\n");
+  }
+  else
+  {
+    // Repetir enquanto o programa conseguir ler uma linha do arquivo
+    int i = 0;
+    while (fread(&p, sizeof(Senha), 1, f) == 1)
+    {
+      char senhaDescriptografada[20];
+
+      descriptografar(p.senha, senhaDescriptografada, senhaMestra);
+      printf("%s\n", senhaDescriptografada);
+
+      criptografar(senhaDescriptografada, p.senha, novaSenhaMestra);
+      listaDeSenhas[i] = p;
+      i++;
+    }
+
+    fwrite(&p, sizeof(Senha), 1, f); // Salvando as informações passadas pelo user.
+
+    strcpy(senhaMestra, novaSenhaMestra);
+    printf("%s\n", senhaMestra);
+    fm = fopen("senha_mestra.bin", "wb+");
+
+    char senhaCriptografada[100];
+    criptografar(senhaMestra, senhaCriptografada, senhaMestra);
+    fwrite(senhaCriptografada, 1, strlen(senhaCriptografada) * sizeof(char), fm);
+
+    gerarArquivo(listaDeSenhas, totalDeSenhas);
+  }
+
+  fclose(fm);
+}
 
 //------------------------------------------------------
 void gerarArquivo(Senha listaDeSenhas[], int totalDeSenhas)

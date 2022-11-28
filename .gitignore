@@ -53,6 +53,7 @@ dkms.conf
 
 # Senhas
 senhas.bin
+senha_mestra.bin
 .backup
 ciphertext
 # Configurações do vscode
